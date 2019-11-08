@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Insert title here</title>
+</head>
+<body>
+
+	<form>
+		<input type="hidden" id="username" name="username" /> <label>昵称：</label>
+		<input type="text" id="nickname" placeholder="昵称" /> <br> <label>头像：</label>
+		<input type="text" id="photo" placeholder="头像" /> <br> <label>性别：</label>
+		<input value="true" type="radio" checked="checked" name="per" />男 <input
+			value="false" type="radio" name="per" />女 <br> <label>年龄：</label>
+		<input type="text" id="age" placeholder="年龄" /> <br> <label>手机：</label>
+		<input type="text" id="phone" placeholder="手机" /> <br> <label>邮箱：</label>
+		<input type="text" id="email" placeholder="邮箱" /> <br> <label>简介：</label>
+		<input type="text" id="des" placeholder="简介" />
+	</form>
+	<div class="modal-footer">
+		<!-- 		<button type="reset" class="btn btn-default" >重置</button> -->
+		<button type="submit" class="btn btn-primary" onclick="submit();">保存修改</button>
+	</div>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<br>
+	<!-- 	<div><input type="button" value="退出登录" onclick="location.href='http://localhost:8080/CloudServer/user/logout'" /></div> -->
+
+</body>
+<script type="text/javascript"
+	src="http://cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
+<script
+	src="https://cdn.bootcss.com/jquery-cookie/1.4.1/jquery.cookie.js"></script>
+<script type="text/javascript">
+	function check() {
+		var radio = document.getElementsByName("per");
+		for (i = 0; i < radio.length; i++) {
+			if (radio[i].checked) {
+				return radio[i].value;
+
+			}
+		}
+	}
+
+	//	加载页面时触发的函数
+	window.onload = function() {
+		var username = "Mr.Long";
+		if ($.cookie('token') == undefined) {//前端判断cookie是否有token，没有即重新登录，有即向后端发送给请求，把带有token的cookie传过去
+			alert("登录验证失败！请重新登录");
+			window.location.href = "login.html";
+		} else {
+			$.ajax({
+				url : "http://47.97.214.92:8080/CloudServer/user/selectUserInfo",
+				dataType : "json",
+				data : username,
+				type : "GET",
+                //headers: { 'Content-Type': 'application/json;charset=utf8', 'token': $.cookie('token') },
+				beforeSend : function(request) {
+					//将cookie中的token信息放于请求头中
+					request.setRequestHeader("token", $.cookie('token'));
+				},
+				success : function(res) {
+					console.log(res);
+				},
+				error : function (res){
+					console.log(res);
+				}
+			});
+		}
+	}
+
+	function submit() {
+		var username = "admin";
+		var nickname = $("#nickname").val();
+		var photo = $("#photo").val();
+		var sex = check();
+		var age = $("#age").val();
+		var phone = $("#phone").val();
+		var email = $("#email").val();
+		var des = $("#des").val();
+
+		$.ajax({
+			url : "http://47.97.214.92:8080/CloudServer/user/changeUserInfo",
+			type : "post",
+			data : JSON.stringify({
+				username : username,
+				nickname : nickname,
+				photo : photo,
+				sex : sex,
+				age : age,
+				phone : phone,
+				email : email,
+				des : des
+			}),
+			contentType : "application/json;charset=UTF-8",
+			dataType : "json",
+			success : function(data) {
+				if (data.status == "200") {
+					console.log(data);
+					alert("修改成功")
+					//window.location.href = "${pageContext.request.contextPath }/user/logout";
+				} else if (data.status == "402") {
+					console.log(data);
+					alert("修改失败！");
+				} else {
+					console.log(data);
+					alert("修改失败！");
+				}
+
+			},
+			error : function() {
+				alert("操作失败！");
+			}
+		});
+
+	}
+</script>
+</html>

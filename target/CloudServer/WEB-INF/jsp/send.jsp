@@ -20,13 +20,13 @@
 	var websocket = null;
 	if ('WebSocket' in window) {
 		websocket = new WebSocket(
-				"ws://localhost:8080/Vehicleye/websocket/socketServer");
+				"ws://localhost:8080/CloudServer/websocket/socketServer");
 	} else if ('MozWebSocket' in window) {
 		websocket = new MozWebSocket(
-				"ws://localhost:8080/Vehicleye/websocket/socketServer");
+				"ws://localhost:8080/CloudServer/websocket/socketServer");
 	} else {
 		websocket = new SockJS(
-				"http://localhost:8080/Vehicleye/sockjs/socketServer");
+				"http://localhost:8080/CloudServer/sockjs/socketServer");
 	}
 
 	websocket.onopen = function (openEvt) {

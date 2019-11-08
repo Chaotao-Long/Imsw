@@ -23,7 +23,13 @@ public class User {
 
     private String des;
 
+    private String address;
+
     private Integer balance;
+
+    private Integer status;
+
+    private Date logintime;
 
     private Date registertime;
 
@@ -107,12 +113,36 @@ public class User {
         this.des = des == null ? null : des.trim();
     }
 
+    public String getAddress() {
+        return address;
+    }
+
+    public void setAddress(String address) {
+        this.address = address == null ? null : address.trim();
+    }
+
     public Integer getBalance() {
         return balance;
     }
 
     public void setBalance(Integer balance) {
         this.balance = balance;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
+    }
+
+    public Date getLogintime() {
+        return logintime;
+    }
+
+    public void setLogintime(Date logintime) {
+        this.logintime = logintime;
     }
 
     public Date getRegistertime() {
@@ -127,7 +157,8 @@ public class User {
 	public String toString() {
 		return "User [id=" + id + ", username=" + username + ", password=" + password + ", nickname=" + nickname
 				+ ", photo=" + photo + ", sex=" + sex + ", age=" + age + ", phone=" + phone + ", email=" + email
-				+ ", des=" + des + ", balance=" + balance + ", registertime=" + registertime + "]";
+				+ ", des=" + des + ", address=" + address + ", balance=" + balance + ", status=" + status
+				+ ", logintime=" + logintime + ", registertime=" + registertime + "]";
 	}
     
     

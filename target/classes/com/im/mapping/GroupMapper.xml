@@ -6,10 +6,12 @@
     <result column="group_id" property="groupId" jdbcType="VARCHAR" />
     <result column="groupName" property="groupname" jdbcType="VARCHAR" />
     <result column="groupDesc" property="groupdesc" jdbcType="VARCHAR" />
+    <result column="personTotal" property="persontotal" jdbcType="INTEGER" />
+    <result column="groupPhoto" property="groupphoto" jdbcType="VARCHAR" />
     <result column="createtime" property="createtime" jdbcType="TIMESTAMP" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, group_id, groupName, groupDesc, createtime
+    id, group_id, groupName, groupDesc, personTotal, groupPhoto, createtime
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
@@ -18,14 +20,16 @@
     where id = #{id,jdbcType=INTEGER}
   </select>
   <delete id="deleteByPrimaryKey" parameterType="java.lang.Integer" >
-    delete from group
+    delete from `group`
     where id = #{id,jdbcType=INTEGER}
   </delete>
   <insert id="insert" parameterType="com.im.dbmodel.Group" >
     insert into group (id, group_id, groupName, 
-      groupDesc, createtime)
+      groupDesc, personTotal, groupPhoto, 
+      createtime)
     values (#{id,jdbcType=INTEGER}, #{groupId,jdbcType=VARCHAR}, #{groupname,jdbcType=VARCHAR}, 
-      #{groupdesc,jdbcType=VARCHAR}, #{createtime,jdbcType=TIMESTAMP})
+      #{groupdesc,jdbcType=VARCHAR}, #{persontotal,jdbcType=INTEGER}, #{groupphoto,jdbcType=VARCHAR}, 
+      #{createtime,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="com.im.dbmodel.Group" >
     insert into group
@@ -41,6 +45,12 @@
       </if>
       <if test="groupdesc != null" >
         groupDesc,
+      </if>
+      <if test="persontotal != null" >
+        personTotal,
+      </if>
+      <if test="groupphoto != null" >
+        groupPhoto,
       </if>
       <if test="createtime != null" >
         createtime,
@@ -59,13 +69,19 @@
       <if test="groupdesc != null" >
         #{groupdesc,jdbcType=VARCHAR},
       </if>
+      <if test="persontotal != null" >
+        #{persontotal,jdbcType=INTEGER},
+      </if>
+      <if test="groupphoto != null" >
+        #{groupphoto,jdbcType=VARCHAR},
+      </if>
       <if test="createtime != null" >
         #{createtime,jdbcType=TIMESTAMP},
       </if>
     </trim>
   </insert>
   <update id="updateByPrimaryKeySelective" parameterType="com.im.dbmodel.Group" >
-    update group
+    update `group`
     <set >
       <if test="groupId != null" >
         group_id = #{groupId,jdbcType=VARCHAR},
@@ -75,6 +91,12 @@
       </if>
       <if test="groupdesc != null" >
         groupDesc = #{groupdesc,jdbcType=VARCHAR},
+      </if>
+      <if test="persontotal != null" >
+        personTotal = #{persontotal,jdbcType=INTEGER},
+      </if>
+      <if test="groupphoto != null" >
+        groupPhoto = #{groupphoto,jdbcType=VARCHAR},
       </if>
       <if test="createtime != null" >
         createtime = #{createtime,jdbcType=TIMESTAMP},
@@ -87,6 +109,8 @@
     set group_id = #{groupId,jdbcType=VARCHAR},
       groupName = #{groupname,jdbcType=VARCHAR},
       groupDesc = #{groupdesc,jdbcType=VARCHAR},
+      personTotal = #{persontotal,jdbcType=INTEGER},
+      groupPhoto = #{groupphoto,jdbcType=VARCHAR},
       createtime = #{createtime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>

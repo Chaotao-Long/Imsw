@@ -1,5 +1,7 @@
 package com.im.serviceimpl;
 
+import java.util.Date;
+
 import javax.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,7 +30,7 @@ public class UserServiceImpl implements UserService {
 		return userMapper.getUserByUsernameAndPassword(username, password);
 	}
 
-	//用户注册
+	//用户注册，用自定义的方法
 	@Override
 	public void addEntitytoUser(User user) {
 
@@ -36,7 +38,7 @@ public class UserServiceImpl implements UserService {
 		
 	}
 	
-	//用户注册方法1
+	//用户注册方法1，用mybatis的逆向工程生成器生成的默认方法
 	public int addEntitytoUser1(User user) {
 
 		return userMapper.insertSelective(user);		
@@ -50,16 +52,35 @@ public class UserServiceImpl implements UserService {
 
 	//修改用户信息
 	@Override
-	public void updateUserInfo(User user) {
+	public int updateUserInfo(User user) {
 
-		userMapper.updateUserInfo(user);
+		 return userMapper.updateByPrimaryKeySelective(user);
 	}
 
 	//修改密码
 	@Override
-	public void updatePasswordById(int id, String newPassword) {
+	public void updatePasswordByUsername(String username, String newPassword) {
 
-		userMapper.updateUserPassword(id, newPassword);
+		userMapper.updateUserPassword(username, newPassword);
+	}
+
+	//根据username查询用户
+	@Override
+	public User getFromUserByUsername(String username) {
+		
+		return userMapper.getFromUserByUsername(username);
+	}
+
+	@Override
+	public void updateLogintimeByUsername(String username, Date logintime) {
+
+		userMapper.updateLogintimeByUsername(username, logintime);
+	}
+
+	@Override
+	public void updateStatusByUsername(String username, Integer status) {
+
+		userMapper.updateStatusByUsername(username, status);
 	}
 
 }

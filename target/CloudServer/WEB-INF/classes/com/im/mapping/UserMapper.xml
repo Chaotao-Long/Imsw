@@ -12,11 +12,15 @@
     <result column="phone" property="phone" jdbcType="VARCHAR" />
     <result column="email" property="email" jdbcType="VARCHAR" />
     <result column="des" property="des" jdbcType="VARCHAR" />
+    <result column="address" property="address" jdbcType="VARCHAR" />
     <result column="balance" property="balance" jdbcType="INTEGER" />
+    <result column="status" property="status" jdbcType="INTEGER" />
+    <result column="logintime" property="logintime" jdbcType="TIMESTAMP" />
     <result column="registertime" property="registertime" jdbcType="TIMESTAMP" />
   </resultMap>
   <sql id="Base_Column_List" >
-    id, username, password, nickname, photo, sex, age, phone, email, des, balance, registertime
+    id, username, password, nickname, photo, sex, age, phone, email, des, address, balance, 
+    status, logintime, registertime
   </sql>
   <select id="selectByPrimaryKey" resultMap="BaseResultMap" parameterType="java.lang.Integer" >
     select 
@@ -32,11 +36,13 @@
     insert into user (id, username, password, 
       nickname, photo, sex, age, 
       phone, email, des, 
-      balance, registertime)
+      address, balance, status, 
+      logintime, registertime)
     values (#{id,jdbcType=INTEGER}, #{username,jdbcType=VARCHAR}, #{password,jdbcType=VARCHAR}, 
       #{nickname,jdbcType=VARCHAR}, #{photo,jdbcType=VARCHAR}, #{sex,jdbcType=BIT}, #{age,jdbcType=INTEGER}, 
       #{phone,jdbcType=VARCHAR}, #{email,jdbcType=VARCHAR}, #{des,jdbcType=VARCHAR}, 
-      #{balance,jdbcType=INTEGER}, #{registertime,jdbcType=TIMESTAMP})
+      #{address,jdbcType=VARCHAR}, #{balance,jdbcType=INTEGER}, #{status,jdbcType=INTEGER}, 
+      #{logintime,jdbcType=TIMESTAMP}, #{registertime,jdbcType=TIMESTAMP})
   </insert>
   <insert id="insertSelective" parameterType="com.im.dbmodel.User" >
     insert into user
@@ -71,8 +77,17 @@
       <if test="des != null" >
         des,
       </if>
+      <if test="address != null" >
+        address,
+      </if>
       <if test="balance != null" >
         balance,
+      </if>
+      <if test="status != null" >
+        status,
+      </if>
+      <if test="logintime != null" >
+        logintime,
       </if>
       <if test="registertime != null" >
         registertime,
@@ -109,8 +124,17 @@
       <if test="des != null" >
         #{des,jdbcType=VARCHAR},
       </if>
+      <if test="address != null" >
+        #{address,jdbcType=VARCHAR},
+      </if>
       <if test="balance != null" >
         #{balance,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        #{status,jdbcType=INTEGER},
+      </if>
+      <if test="logintime != null" >
+        #{logintime,jdbcType=TIMESTAMP},
       </if>
       <if test="registertime != null" >
         #{registertime,jdbcType=TIMESTAMP},
@@ -147,8 +171,17 @@
       <if test="des != null" >
         des = #{des,jdbcType=VARCHAR},
       </if>
+      <if test="address != null" >
+        address = #{address,jdbcType=VARCHAR},
+      </if>
       <if test="balance != null" >
         balance = #{balance,jdbcType=INTEGER},
+      </if>
+      <if test="status != null" >
+        status = #{status,jdbcType=INTEGER},
+      </if>
+      <if test="logintime != null" >
+        logintime = #{logintime,jdbcType=TIMESTAMP},
       </if>
       <if test="registertime != null" >
         registertime = #{registertime,jdbcType=TIMESTAMP},
@@ -167,7 +200,10 @@
       phone = #{phone,jdbcType=VARCHAR},
       email = #{email,jdbcType=VARCHAR},
       des = #{des,jdbcType=VARCHAR},
+      address = #{address,jdbcType=VARCHAR},
       balance = #{balance,jdbcType=INTEGER},
+      status = #{status,jdbcType=INTEGER},
+      logintime = #{logintime,jdbcType=TIMESTAMP},
       registertime = #{registertime,jdbcType=TIMESTAMP}
     where id = #{id,jdbcType=INTEGER}
   </update>

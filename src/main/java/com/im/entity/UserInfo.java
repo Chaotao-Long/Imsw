@@ -1,15 +1,19 @@
 package com.im.entity;
 
-import java.util.Date;
+import org.springframework.web.multipart.MultipartFile;
 
 //用户开发资料
 public class UserInfo {
 
 	private String username;
 
+	private String password;
+
 	private String nickname;
 
 	private String photo;
+
+	private MultipartFile photoFile;
 
 	private Boolean sex;
 
@@ -20,6 +24,12 @@ public class UserInfo {
 	private String email;
 
 	private String des;
+
+	private String address;
+
+	private Integer status;
+
+	private String logintime;
 
 	public String getUsername() {
 		return username;
@@ -37,12 +47,28 @@ public class UserInfo {
 		this.nickname = nickname;
 	}
 
+	public String getPassword() {
+		return password;
+	}
+
+	public void setPassword(String password) {
+		this.password = password;
+	}
+
 	public String getPhoto() {
 		return photo;
 	}
 
 	public void setPhoto(String photo) {
 		this.photo = photo;
+	}
+
+	public MultipartFile getPhotoFile() {
+		return photoFile;
+	}
+
+	public void setPhotoFile(MultipartFile photoFile) {
+		this.photoFile = photoFile;
 	}
 
 	public Boolean getSex() {
@@ -85,16 +111,28 @@ public class UserInfo {
 		this.des = des;
 	}
 
-	public UserInfo(String username, String nickname, String photo, Boolean sex, Integer age, String phone,
-			String email, String des) {
-		this.username = username;
-		this.nickname = nickname;
-		this.photo = photo;
-		this.sex = sex;
-		this.age = age;
-		this.phone = phone;
-		this.email = email;
-		this.des = des;
+	public String getAddress() {
+		return address;
+	}
+
+	public void setAddress(String address) {
+		this.address = address;
+	}
+
+	public Integer getStatus() {
+		return status;
+	}
+
+	public void setStatus(Integer status) {
+		this.status = status;
+	}
+
+	public String getLogintime() {
+		return logintime;
+	}
+
+	public void setLogintime(String logintime) {
+		this.logintime = logintime;
 	}
 
 }

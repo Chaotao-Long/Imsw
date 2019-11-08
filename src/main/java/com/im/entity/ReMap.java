@@ -1,19 +1,19 @@
 package com.im.entity;
 
 public class ReMap {
-	private String status;
+	private int status;
 	private String msg;
-	
+
 	public ReMap() {
-		status = "200";
+		status = 200;
 		msg = "request successfully!";
 	}
-	
-	public String getStatus() {
+
+	public int getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(int status) {
 		this.status = status;
 	}
 

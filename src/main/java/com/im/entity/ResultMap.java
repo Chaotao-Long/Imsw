@@ -1,24 +1,22 @@
 package com.im.entity;
 
-import java.util.List;
-
 public class ResultMap {
 
-	private String status;
+	private int status;
 	private String msg;
 	private UserInfo userInfo;
 
 	public ResultMap() {
-		status = "200";
+		status = 200;
 		msg = "request successfully!";
 		userInfo = null;
 	}
 
-	public String getStatus() {
+	public int getStatus() {
 		return status;
 	}
 
-	public void setStatus(String status) {
+	public void setStatus(int status) {
 		this.status = status;
 	}
 
@@ -38,7 +36,4 @@ public class ResultMap {
 		this.userInfo = userInfo;
 	}
 
-	
-
-	
 }

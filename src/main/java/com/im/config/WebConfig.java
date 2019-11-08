@@ -13,7 +13,6 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.DefaultServletHandlerConfigurer;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurerAdapter;
 import org.springframework.web.servlet.handler.SimpleMappingExceptionResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
@@ -21,7 +20,7 @@ import org.springframework.web.servlet.view.JstlView;
 
 @Configuration
 @EnableWebMvc
-@ComponentScan(value="com.im.controller")
+@ComponentScan(value = "com.im.controller")
 
 public class WebConfig extends WebMvcConfigurerAdapter {
 
@@ -102,13 +101,21 @@ public class WebConfig extends WebMvcConfigurerAdapter {
 //		setCachePeriod(propertyConfig.getWebStaticCachedPeriod());
 //	}
 
-	/**
-	 * 添加拦截器
-	 */
-	@Override
-	public void addInterceptors(InterceptorRegistry registry) {
-		super.addInterceptors(registry);
-	}
-	
+//	/**
+//	 * 添加拦截器
+//	 */
+//	@Override
+//	public void addInterceptors(InterceptorRegistry registry) {
+////		super.addInterceptors(registry);
+////		registry.addInterceptor(new JwtInterceptor()).addPathPatterns("/**");
+////		 addPathPatterns 用于添加拦截规则
+////         excludePathPatterns 配置某些路径不拦截
+//        InterceptorRegistration addInterceptor  = registry.addInterceptor(new JwtInterceptor());
+//        addInterceptor.excludePathPatterns("/user/login");
+//        addInterceptor.excludePathPatterns("/user/submit");
+//        addInterceptor.excludePathPatterns("/chat/enterChat");
+//        addInterceptor.addPathPatterns("/**");
+//
+//	}
 
 }

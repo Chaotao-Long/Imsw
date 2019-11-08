@@ -14,115 +14,77 @@
 <title>修改用户信息</title>
 </head>
 <body>
-	<h1>查看用户信息</h1>
+	<h1>标识</h1>
 	用户：${USER_SESSION.username} 你好
-
-
-
-	<form id="edit_customer_form">
-		<input type="hidden" id="id" name="id" />
-		<div class="form-group">
-			<label for="nickname" class="col-sm-2 control-label">昵称</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" id="nickname"
-					placeholder="昵称" name="nickname" />
-			</div>
-		</div>
-		<div class="form-group">
-			<label for="photo" class="col-sm-2 control-label">头像</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" id="photo" placeholder="头像"
-					name="photo" />
-			</div>
-		</div>
-		<div class="form-group">
-			<label for="sex" class="col-sm-2 control-label">性别</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" id="sex" placeholder="性别"
-					name="sex" />
-			</div>
-		</div>
-		<div class="form-group">
-			<label for="age" class="col-sm-2 control-label">年龄</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" id="age" placeholder="年龄"
-					name="age" />
-			</div>
-		</div>
-		<div class="form-group">
-			<label for="phone" class="col-sm-2 control-label">手机</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" id="phone" placeholder="手机"
-					name="phone" />
-			</div>
-		</div>
-		<div class="form-group">
-			<label for="email" class="col-sm-2 control-label">邮箱</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" id="email" placeholder="邮箱"
-					name="email" />
-			</div>
-		</div>
-		<div class="form-group">
-			<label for="des" class="col-sm-2 control-label">简介</label>
-			<div class="col-sm-10">
-				<input type="text" class="form-control" id="des" placeholder="简介"
-					name="des" />
-			</div>
-		</div>
+	密码：${USER_SESSION.password}
+	余额：${USER_SESSION.balance}
+<%-- 	昵称：${USER_SESSION.nickname} --%>
+<%-- 	头像：${USER_SESSION.photo} --%>
+<%-- 	年龄：${USER_SESSION.age} --%>
+<%-- 	手机：${USER_SESSION.phone} --%>
+<%-- 	邮箱：${USER_SESSION.email} --%>
+<%-- 	简介：${USER_SESSION.des} --%>
+	<form>
+		<input type="hidden" id="username" name="username" /> <label>昵称：</label>
+		<input type="text" id="nickname" placeholder="昵称" /> <br> <label>头像：</label>
+		<input type="text" id="photo" placeholder="头像" /> <br> <label>性别：</label>
+		<input value="true" type="radio" checked="checked" name="per" />男 <input
+			value="false" type="radio" name="per" />女 <br> <label>年龄：</label>
+		<input type="text" id="age" placeholder="年龄" /> <br> <label>手机：</label>
+		<input type="text" id="phone" placeholder="手机" /> <br> <label>邮箱：</label>
+		<input type="text" id="email" placeholder="邮箱" /> <br> <label>简介：</label>
+		<input type="text" id="des" placeholder="简介" />
 	</form>
 	<div class="modal-footer">
-<!-- 		<button type="reset" class="btn btn-default" >重置</button> -->
-		<button type="submit" class="btn btn-primary"
-			onclick="submit();">保存修改</button>
+		<!-- 		<button type="reset" class="btn btn-default" >重置</button> -->
+		<button type="submit" class="btn btn-primary" onclick="submit();">保存修改</button>
 	</div>
+	<br><br><br><br><br><br><br><br><br><br>
+	<div><input type="button" value="退出登录" onclick="location.href='${pageContext.request.contextPath }/user/logout'" /></div>
 
 </body>
-<!-- 引入js文件 -->
-<!-- jQuery -->
-<script src="<%=basePath%>js/jquery-1.11.3.min.js"></script>
-<!-- Bootstrap Core JavaScript -->
-<script src="<%=basePath%>js/bootstrap.min.js"></script>
-<!-- Metis Menu Plugin JavaScript -->
-<script src="<%=basePath%>js/metisMenu.min.js"></script>
-<!-- DataTables JavaScript -->
-<script src="<%=basePath%>js/jquery.dataTables.min.js"></script>
-<script src="<%=basePath%>js/dataTables.bootstrap.min.js"></script>
-<!-- Custom Theme JavaScript -->
-<script src="<%=basePath%>js/sb-admin-2.js"></script>
-<!-- 编写js代码 -->
-
+<script type="text/javascript"
+	src="http://cdn.bootcss.com/jquery/3.1.0/jquery.min.js"></script>
 <script type="text/javascript">
-// 执行修改客户操作
-	function updateCustomer() {
-		$.post("<%=basePath%>user/changeUserInfo", $("#edit_customer_form").serialize(), function(data) {
-			if (data.status == "200") {
-				alert("客户信息更新成功！");
-				//window.location.reload();
-			} else {
-				alert("客户信息更新失败！");
-				window.location.reload();
-			}
-		});
+
+//	加载页面时触发的函数
+// window.onload = function() {
+
+    $("#nickname").val("${USER_SESSION.nickname}");
+    $("#photo").val("${USER_SESSION.photo}");
+    $("#age").val("${USER_SESSION.age}");
+    $("#phone").val("${USER_SESSION.phone}");
+    $("#email").val("${USER_SESSION.email}");
+    $("#des").val("${USER_SESSION.des}");
+
+// }
+	
+function check() {
+	var radio = document.getElementsByName("per");
+	for (i = 0; i < radio.length; i++) {
+		if (radio[i].checked) {
+			return radio[i].value;
+
+		}
 	}
-	
-	
+}
 	
 	
 	function submit() {
+		var username = "${USER_SESSION.username}";
 		var nickname = $("#nickname").val();
 		var photo = $("#photo").val();
-		var sex = $("#sex").val();
+		var sex = check();
 		var age = $("#age").val();
 		var phone = $("#phone").val();
 		var email = $("#email").val();
 		var des = $("#des").val();
-		console.log(11111);
-		
+
 			$.ajax({
 				url : "<%=basePath%>/user/changeUserInfo",
 				type : "post",
-				data : JSON.stringify({
+				data : JSON.stringify({		
+					username : username,
 					nickname : nickname,
 					photo : photo,
 					sex : sex,
@@ -134,10 +96,18 @@
 				contentType : "application/json;charset=UTF-8",
 				dataType : "json",
 				success : function(data) {
-					
-						console.log(data);
+					if(data.status == "200")
+						{
+						console.log(data.msg);
 						alert("修改成功")
- 						//window.location.href = "login.html";
+ 						window.location.href = "${pageContext.request.contextPath }/user/logout";
+						}else if(data.status == "402"){
+							console.log(data.msg);
+							alert("修改失败！");
+						}else{
+							console.log(data.msg);
+							alert("修改失败！");
+						}
 					
 				},
 				error : function() {

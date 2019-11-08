@@ -2,169 +2,266 @@ package com.im.controller;
 
 import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
-import javax.enterprise.inject.New;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.im.dbmodel.User;
+import com.im.entity.ConstantBean;
 import com.im.entity.ReMap;
 import com.im.entity.ResultMap;
 import com.im.entity.UserInfo;
+import com.im.exception.CloudServerDatabaseException;
+import com.im.exception.CloudServerNotFoundException;
+import com.im.exception.CloudServerPermissionDenyException;
+import com.im.log4j.Logger;
 import com.im.service.UserService;
+import com.im.util.FileUtil;
+import com.im.util.InfoUtil;
+import com.im.util.JwtUtil;
 import com.im.util.ObjectUtils;
 
-@Controller
+@RestController
 @RequestMapping("/user")
 public class UserController {
 
 	@Autowired
 	private UserService userService;
 
-	// 用户注册
-	@RequestMapping(value = "/toRegister")
-	public String toRegister() {
-		return "register";
-	}
+	public static Logger logger = Logger.getLogger(UserController.class);
 
 	// 提交注册按钮
-	@RequestMapping("/submit")
-	@ResponseBody
-	public String register(@RequestBody User user) {
+	@RequestMapping(value = "/submit", method = RequestMethod.POST)
+	public ReMap register(HttpServletRequest request, @RequestParam("username") String username,
+			@RequestParam("password") String password,
+			@RequestParam(value = "nickname", required = false) String nickname,
+			@RequestParam(value = "photo", required = false) String photo,
+			@RequestParam(value = "photoFile", required = false) MultipartFile photoFile,
+			@RequestParam(value = "sex", required = false) Boolean sex,
+			@RequestParam(value = "age", required = false) Integer age,
+			@RequestParam(value = "phone", required = false) String phone,
+			@RequestParam(value = "email", required = false) String email,
+			@RequestParam(value = "des", required = false) String des,
+			@RequestParam(value = "address", required = false) String address) { // 新增address字段
 
+		User existUser = userService.getFromUserByUsername(username);
+		if (ObjectUtils.isNotNull(existUser)) {
+			logger.error("401, already username!");
+			throw new CloudServerPermissionDenyException(ConstantBean.ALREADY_USERNAME);
+		}
+
+		ReMap reMap = new ReMap();
+		String photoUrl = null;
+
+		if (ObjectUtils.isNotNull(photo) && ObjectUtils.isNotNull(photoFile)) {
+			// 如果文件名不是以图片格式命名则报错
+			if (!photo.endsWith(".jpg") && !photo.endsWith(".png") && !photo.endsWith(".gif")) {
+				reMap.setStatus(404);
+				reMap.setMsg("upload error, file must endswith jpg or png or gif");
+				return reMap;
+			}
+			photoUrl = FileUtil.fileToUrl(request, photoFile, photo, username, "userphoto");
+
+		}
+
+		User user = new User();
+		user.setUsername(username);
+		user.setPassword(password);
+		user.setNickname(nickname);
+		user.setSex(sex);
+		user.setDes(des);
+		user.setEmail(email);
+		user.setAge(age);
+		user.setPhone(phone);
+		user.setAddress(address);
+		user.setPhoto(photoUrl);
 		user.setRegistertime(new Date());
-		System.out.println(user.toString());
-		int rows = userService.addEntitytoUser1(user);
-		System.out.println(rows);
+		user.setStatus(0);
+
+		int rows = userService.addEntitytoUser1(user); // 数据库异常,插入失败
 		if (rows > 0) {
-			return "200";
+			reMap.setMsg("register successfully!");
+			return reMap;
 		} else {
-			return "402";
+			logger.error("402, database error!");
+			throw new CloudServerDatabaseException(ConstantBean.OPERATION_DATABASE);
 		}
 	}
 
 	// 用户登录控制
 	@RequestMapping(value = "/login", method = RequestMethod.POST)
-	public String login(@RequestParam("username") String username, @RequestParam("password") String password,
-			HttpSession session, Model model) {
+	public Map<String, Object> login(@RequestParam("username") String username,
+			@RequestParam("password") String password) {
 
-		User user = userService.getUserByUsernameAndPassword(username, password);
-
-		if (!ObjectUtils.isNull(user)) {
-
-			session.setAttribute("USER_SESSION", user);
-			return "redirect:/index/init";
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+		User user = userService.getFromUserByUsername(username);
+		if (ObjectUtils.isNull(user)) {
+			logger.error("404, user not found!");
+			throw new CloudServerNotFoundException(ConstantBean.USER_NOTFOUND); // 密码错误,权限异常
 		}
-		model.addAttribute("msg", "登录账户或密码错误，请重新输入！");
-		return "login";
-	}
-
-//	退出登录控制
-	@RequestMapping("/logout")
-	public String logout(HttpSession session) {
-		session.invalidate();
-		return "redirect:login";
-	}
-
-	@RequestMapping(value = "/login", method = RequestMethod.GET)
-	public String tologin() {
-		return "login";
-	}
-
-	// 修改密码
-	@RequestMapping("/repair")
-	@ResponseBody
-	public Map<String, Object> repairPassword(@RequestParam("id") Integer id,
-			@RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword,
-			HttpSession session) {
-
-		System.out.println("oldPassword：" + oldPassword);
-		System.out.println("newPassword：" + newPassword);
-
-		Map<String, Object> map = new HashMap<String, Object>();
-		// User user = (User) session.getAttribute("USER_SESSION");
-		User user = userService.getFromUserById(id);
-		if (oldPassword.equals(user.getPassword())) {
-			userService.updatePasswordById(user.getId(), newPassword);
-			System.out.println("修改成功");
-			map.put("status", "200");
-			map.put("msg", "request successfully!");
-			return map;
-		} else {
-			map.put("status", "402");
-			map.put("msg", "oldPassword is not right!");
-			return map;
+		if (!user.getPassword().equals(password)) {
+			logger.error("401, password error!");
+			throw new CloudServerNotFoundException(ConstantBean.OPERATION_TRANSFER_PASSWD); // 密码错误,权限异常
 		}
+
+		userService.updateStatusByUsername(username, 1);
+		userService.updateLogintimeByUsername(username, new Date());
+		String sign = JwtUtil.sign(username);
+		long expire = System.currentTimeMillis() + JwtUtil.maxTime;
+		String token = username + "/" + sign + "/" + expire;
+		System.out.println("登录返回的token值" + token);
+
+		resultMap.put("status", 200);
+		resultMap.put("msg", "login successfully!");
+		resultMap.put("token", token);
+		return resultMap;
 
 	}
 
 	// 查询自身信息
-	@RequestMapping("/selectUserInfo")
-	@ResponseBody
-	public ResultMap selectUserInfo(@RequestParam("userId") Integer userId) {
+	@RequestMapping(value = "/selectUserInfo", method = RequestMethod.GET)
+	public ResultMap selectUserInfo(HttpServletRequest request, @RequestParam("username") String username) {
 
 		ResultMap resultMap = new ResultMap();
-		User user = userService.getFromUserById(userId);
-		if (ObjectUtils.isNotNull(user)) {
-			UserInfo userInfo = new UserInfo(user.getUsername(), user.getNickname(), user.getPhoto(), user.getSex(),
-					user.getAge(), user.getPhone(), user.getEmail(), user.getDes());
-			resultMap.setUserInfo(userInfo);
-			return resultMap;
+		User user = userService.getFromUserByUsername(username);
+		if (ObjectUtils.isNull(user)) {
+			logger.error("404, user not found!");
+			throw new CloudServerNotFoundException(ConstantBean.USER_NOTFOUND);
 		}
-		resultMap.setMsg("402");
-		resultMap.setMsg("userId is not found!");
+		UserInfo userInfo = new UserInfo();
+		InfoUtil.UsertransInfo(user, userInfo);
+		resultMap.setUserInfo(userInfo);
 		return resultMap;
+
+	}
+
+	// 修改密码
+	@RequestMapping(value = "/repair", method = RequestMethod.POST)
+	public ReMap repairPassword(@RequestParam("username") String username,
+			@RequestParam("oldPassword") String oldPassword, @RequestParam("newPassword") String newPassword,
+			HttpSession session) {
+
+		ReMap reMap = new ReMap();
+		User user = userService.getFromUserByUsername(username);
+		if (ObjectUtils.isNotNull(user)) {
+			if (oldPassword.equals(user.getPassword())) {
+
+				userService.updatePasswordByUsername(user.getUsername(), newPassword);
+				return reMap;
+			} else {
+				logger.error("402, oldPassword error!");
+				throw new CloudServerNotFoundException(ConstantBean.OLD_PASSWORD);
+			}
+		} else {
+			logger.error("404, user not found");
+			throw new CloudServerNotFoundException(ConstantBean.USER_NOTFOUND);
+		}
+
 	}
 
 	// 修改用户信息
 	@RequestMapping(value = "/changeUserInfo", method = RequestMethod.POST)
-	@ResponseBody
-	public ReMap changeUserInfo(@RequestBody User user) {
-		System.out.println("1111111111111111111111111111111111111111");
-		System.out.println("user："+user);
+	public ReMap changeUserInfo(HttpServletRequest request, @RequestParam("username") String username,
+			@RequestParam(value = "nickname", required = false) String nickname,
+			@RequestParam(value = "photo", required = false) String photo,
+			@RequestParam(value = "photoFile", required = false) MultipartFile photoFile,
+			@RequestParam(value = "sex", required = false) Boolean sex,
+			@RequestParam(value = "age", required = false) Integer age,
+			@RequestParam(value = "phone", required = false) String phone,
+			@RequestParam(value = "email", required = false) String email,
+			@RequestParam(value = "des", required = false) String des,
+			@RequestParam(value = "address", required = false) String address) { // 新增address字段
+
 		ReMap reMap = new ReMap();
-		User oldUser = userService.getFromUserById(user.getId());
-		if (ObjectUtils.isNotNull(oldUser)) {
-			userService.updateUserInfo(user);
-			return reMap;
+		User user = new User();
+		// User oldUser = userService.getFromUserByUsername(userInfo.getUsername());
+		User oldUser = userService.getFromUserByUsername(username);
+
+		if (ObjectUtils.isNull(oldUser)) {
+			logger.error("404, user not found");
+			throw new CloudServerNotFoundException(ConstantBean.USER_NOTFOUND);
 		}
-		reMap.setStatus("402");
-		reMap.setMsg("user is not found!");
+		
+		String photoUrl = null;
+		if (ObjectUtils.isNotNull(photo) && ObjectUtils.isNotNull(photoFile)) {
+			// 如果文件名不是以图片格式命名则报错
+			if (!photo.endsWith(".jpg") && !photo.endsWith(".png") && !photo.endsWith(".gif")) {
+				reMap.setStatus(404);
+				reMap.setMsg("upload error, file must endswith jpg or png or gif");
+				return reMap;
+			}
+			photoUrl = FileUtil.fileToUrl(request, photoFile, photo, username, "userphoto");
+
+		}
+		
+			user.setNickname(nickname);
+			user.setSex(sex);
+			user.setDes(des);
+			user.setEmail(email);
+			user.setAge(age);
+			user.setPhone(phone);
+			user.setAddress(address);
+			user.setPhoto(photoUrl);
+			 //InfoUtil.infotransUser(user, userInfo); // userinfo转为user
+			user.setId(oldUser.getId());
+
+			int row = userService.updateUserInfo(user); // 用了生成器默认的方法(根据id进行选择性地更新)，可以自定义改为根据username来更新
+			if (row > 0) {
+				reMap.setMsg("alter successfully!");
+				return reMap;
+			} else { // 数据库异常
+				logger.error("402, database error!");
+				throw new CloudServerDatabaseException(ConstantBean.OPERATION_DATABASE);
+			}
+		
+	
+
+	}
+
+	// 查看以往头像列表
+	@RequestMapping(value = "/getUserPhoto", method = RequestMethod.GET)
+	public Map<String, Object> userPhoto(@RequestParam("username") String username, HttpServletRequest request) {
+
+		User user = userService.getFromUserByUsername(username);
+		if (ObjectUtils.isNull(user)) {
+			logger.error("404, user not found");
+			throw new CloudServerNotFoundException(ConstantBean.USER_NOTFOUND);
+		}
+
+		Map<String, Object> resultMap = new HashMap<String, Object>();
+
+		List<String> fileList = FileUtil.selectFileList(request, username, "userphoto");
+		System.out.println("fileList：" + fileList);
+
+		resultMap.put("status", 200);
+		resultMap.put("msg", "request successfully!");
+		resultMap.put("fileList", fileList);
+		return resultMap;
+
+	}
+
+	// 退出
+	@RequestMapping(value = "/exit", method = RequestMethod.GET)
+	public ReMap exitSystem(@RequestParam("username") String username) {
+
+		ReMap reMap = new ReMap();
+		User user = userService.getFromUserByUsername(username);
+		if (ObjectUtils.isNull(user)) {
+			logger.error("404, user not found");
+			throw new CloudServerNotFoundException(ConstantBean.USER_NOTFOUND);
+		}
+
+		userService.updateStatusByUsername(username, 0);
 		return reMap;
 	}
 
-	// 查询好友信息
-	@RequestMapping("/selectFriendInfo")
-	@ResponseBody
-	public ResultMap selectFriendInfo(@RequestParam("userId") Integer userId,
-			@RequestParam("friendId") Integer friendId) {
-
-		ResultMap resultMap = new ResultMap();
-
-		return resultMap;
-	}
-
-//	测试拦截器
-//	@RequestMapping("/customer.action")
-//	public String main() {
-//		return "customer";
-//	}
-
-//	测试/login.action
-//	@RequestMapping("/login1.action")
-//	public String tologin(Integer id) {
-//		if (id == 1) {
-//			return "customer";
-//		}
-//		return "login";
-//	}
 }
